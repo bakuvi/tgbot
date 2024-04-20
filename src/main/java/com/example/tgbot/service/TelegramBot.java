@@ -26,7 +26,7 @@ import java.util.List;
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
     @Autowired
-    private UserRepository userRepository;
+   private UserRepository userRepository;
 
     static final String HELP_TEXT = "This bot is created to demonstrate Java Spring skills. if u have any questions contact me on " +
             "@bakuvi";
@@ -69,6 +69,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private  void registerUser(Message message) {
+
 if(userRepository.findById(message.getChatId()).isEmpty()){
     Long chatId= message.getChatId();
     Chat chat= message.getChat();

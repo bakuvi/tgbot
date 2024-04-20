@@ -14,7 +14,7 @@ import java.sql.Timestamp;
 public class User {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
+            //@GeneratedValue(strategy= GenerationType.AUTO)
     @Setter
     @Getter
     private Long chatId;
