@@ -1,8 +1,9 @@
 package com.example.tgbot.service;
 
 import com.example.tgbot.config.BotConfig;
-import com.example.tgbot.model.User;
+
 import com.example.tgbot.model.UserRepository;
+import com.example.tgbot.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
