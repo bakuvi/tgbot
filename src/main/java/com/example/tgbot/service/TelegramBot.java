@@ -54,7 +54,15 @@ public class TelegramBot extends TelegramLongPollingBot {
         if (update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
-
+            if (messageText.contains("/send") && botConfig.getBotOwnerId() == chatId) {
+                var textToSend = messageText.substring(messageText.indexOf(" "));
+//                var users = userRepository.findById((long) 2);
+//                for (User user : users) {
+//                    sendMessage(user.getChatId(), textToSend);
+//                }
+                var user = userRepository.findById((long) 17).get();
+                sendMessage(user.getChatId(), textToSend);
+            }
             switch (messageText) {
                 case "/start":
                     registerUser(update.getMessage());
@@ -70,15 +78,15 @@ public class TelegramBot extends TelegramLongPollingBot {
                     sendMessage(chatId, "Sorry, command not recognized");
             }
         } else if (update.hasCallbackQuery()) {
-            String callbackData= update.getCallbackQuery().getData();
-            long messageId= update.getCallbackQuery().getMessage().getMessageId();
-            long chatId= update.getCallbackQuery().getMessage().getChatId();
+            String callbackData = update.getCallbackQuery().getData();
+            long messageId = update.getCallbackQuery().getMessage().getMessageId();
+            long chatId = update.getCallbackQuery().getMessage().getChatId();
 
-            if (callbackData.equals("YES_BUTTON")){
-                String text="You pressed YES button";
-                EditMessageText message= new EditMessageText();
+            if (callbackData.equals("YES_BUTTON")) {
+                String text = "You pressed YES button";
+                EditMessageText message = new EditMessageText();
                 message.setChatId(String.valueOf(chatId));
-                message.setMessageId((int)messageId);
+                message.setMessageId((int) messageId);
                 message.setText(text);
                 try {
                     execute(message);
@@ -87,10 +95,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                 }
 
             } else if (callbackData.equals("NO_BUTTON")) {
-                String text="You pressed NO button";
-                EditMessageText message= new EditMessageText();
+                String text = "You pressed NO button";
+                EditMessageText message = new EditMessageText();
                 message.setChatId(String.valueOf(chatId));
-                message.setMessageId((int)messageId);
+                message.setMessageId((int) messageId);
                 message.setText(text);
 
                 try {
