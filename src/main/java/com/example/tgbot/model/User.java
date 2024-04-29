@@ -2,43 +2,39 @@ package com.example.tgbot.model;
 
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+
 import java.sql.Timestamp;
 
 
 @Entity(name = "usersDataTable")
+@Data
 public class User {
 
-    @Id
-            //@GeneratedValue(strategy= GenerationType.AUTO)
-    @Setter
-    @Getter
-    private Long chatId;
-    @Setter
-    @Getter
-    private String firstName;
-    @Setter
-    @Getter
-    private String lastName;
-    @Setter
-    @Getter
-    private String userName;
-    @Setter
-    @Getter
-    private Timestamp registeredAt;
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "chatId=" + chatId +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", userName='" + userName + '\'' +
-                ", registeredAt=" + registeredAt +
-                '}';
-    }
+    @Id
+    private Long chatId;
+
+    private Boolean embedeJoke;
+
+    private String phoneNumber;
+
+    private java.sql.Timestamp registeredAt;
+
+    private String firstName;
+
+    private String lastName;
+
+    private String userName;
+
+    private Double latitude;
+
+    private Double longitude;
+
+    private String bio;
+
+    private String description;
+
+    private String pinnedMessage;
 }

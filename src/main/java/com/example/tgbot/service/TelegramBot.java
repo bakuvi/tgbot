@@ -1,8 +1,12 @@
 package com.example.tgbot.service;
 
 import com.example.tgbot.config.BotConfig;
+import com.example.tgbot.model.Joke;
+import com.example.tgbot.model.JokeRepository;
 import com.example.tgbot.model.User;
 import com.example.tgbot.model.UserRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,8 +25,11 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -33,23 +40,30 @@ public class TelegramBot extends TelegramLongPollingBot {
     public static final String ERROR_OCCURED = "Error occured: ";
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    JokeRepository jokeRepository;
 
     static final String HELP_TEXT = "This bot is created to demonstrate Java Spring skills. if u have any questions contact me on " + "@bakuvi";
-    final BotConfig botConfig;
+
+    private BotConfig botConfig;
+
+    static final int MAX_JOKE_ID_MINUS_ONE = 3772;
+    static final String NEXT_JOKE = "NEXT_JOKE";
+
 
     public TelegramBot(BotConfig botConfig) {
         this.botConfig = botConfig;
         List<BotCommand> listOfCommands = new ArrayList<>();
         listOfCommands.add(new BotCommand("/start", "get a welcome message"));
-        listOfCommands.add(new BotCommand("/mydata", "see collected data"));
-        listOfCommands.add(new BotCommand("/deletedata", "delete ur collected data"));
+        listOfCommands.add(new BotCommand("/joke", "get random joke"));
         listOfCommands.add(new BotCommand("/help", "info how to use"));
         listOfCommands.add(new BotCommand("/settings", "set ur preferences"));
         try {
             this.execute(new SetMyCommands(listOfCommands, new BotCommandScopeDefault(), null));
         } catch (TelegramApiException e) {
-            log.error("Error setting bot's command list" + e.getMessage());
+            log.error(Arrays.toString(e.getStackTrace()));
         }
+
     }
 
     @Override
@@ -67,18 +81,30 @@ public class TelegramBot extends TelegramLongPollingBot {
                 sendMessage(user.getChatId(), textToSend, false);
             } else {
                 switch (messageText) {
-                    case "/start":
+                    case "/start" -> {
+                        showStart(chatId, update.getMessage().getChat().getFirstName());
                         registerUser(update.getMessage());
-                        startCommandRecieved(chatId, update.getMessage().getChat().getFirstName());
-                        break;
-                    case "/register":
-                        register(chatId);
-                        break;
-                    case "/help":
+//                        ObjectMapper objectMapper = new ObjectMapper();
+//                        TypeFactory typeFactory = objectMapper.getTypeFactory();
+//                        try {
+//                            List<Joke> jokeList = objectMapper.readValue(new File("/Users/bakuvi/IdeaProjects/TgBot/db/stupidstuff.json"),
+//                                    typeFactory.constructCollectionType(List.class, Joke.class));
+//                            jokeRepository.saveAll(jokeList);
+//                        } catch (IOException e) {
+//                            log.error(Arrays.toString(e.getStackTrace()));
+//                        }
+                    }
+//                    case "/joke" -> {
+//                        var joke = getRandomJoke();
+//
+//                        joke.ifPresent(random -> addButtonAndSendMessage(random.getBody(), chatId()));
+//                    }
+                    case "/help" -> {
                         sendMessage(chatId, HELP_TEXT, false);
-                        break;
-                    default:
+                    }
+                    default -> {
                         sendMessage(chatId, "Sorry, command not recognized", true);
+                    }
                 }
             }
         } else if (update.hasCallbackQuery()) {
@@ -125,7 +151,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         return botConfig.getBotToken();
     }
 
-    private void startCommandRecieved(long chatId, String firstName) {
+    private void showStart(long chatId, String firstName) {
         String answer = "Hi, " + firstName + ", nice to meet u";
         log.info("Replied to user " + firstName);
         sendMessage(chatId, answer, true);
@@ -138,7 +164,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         message.setChatId(String.valueOf(chatId));
         message.setText(textToSend);
 
-        if(showKeyBoard) {
+        if (showKeyBoard) {
             ReplyKeyboardMarkup keyboardMarkup = getReplyKeyboardMarkup();
 
             message.setReplyMarkup(keyboardMarkup);

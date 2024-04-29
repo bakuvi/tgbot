@@ -1,6 +1,7 @@
 package com.example.tgbot.config;
 
 import com.example.tgbot.service.TelegramBot;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -12,9 +13,10 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 @Component
 @Slf4j
+@AllArgsConstructor
 public class BotInitializer {
 
-    @Autowired
+
     TelegramBot bot;
 
     @EventListener({ContextRefreshedEvent.class})
