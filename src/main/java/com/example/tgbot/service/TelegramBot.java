@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
@@ -96,7 +97,9 @@ public class TelegramBot extends TelegramLongPollingBot {
 
             if (callbackData.equals(NEXT_JOKE)) {
                 var joke = getRandomJoke();
-                joke.ifPresent(randomJoke -> addButtonAndSendMessage(randomJoke.getBody(), chatId));
+                // joke.ifPresent(randomJoke -> addButtonAndSendMessage(randomJoke.getBody(), chatId));
+
+                joke.ifPresent(randomJoke -> addButtonAndEditText(randomJoke.getBody(), chatId, update.getCallbackQuery().getMessage().getMessageId()));
 
             }
         }
@@ -114,6 +117,25 @@ public class TelegramBot extends TelegramLongPollingBot {
         message.setText(joke);
         message.setChatId(chatId);
 
+        InlineKeyboardMarkup markup = getInlineKeyboardMarkup();
+        message.setReplyMarkup(markup);
+        executeMessage(message);
+
+    }
+
+    private void addButtonAndEditText(String joke, long chatId, Integer messageId) {
+        EditMessageText message = new EditMessageText();
+        message.setChatId(chatId);
+        message.setText(joke);
+        message.setMessageId(messageId);
+
+        InlineKeyboardMarkup markup = getInlineKeyboardMarkup();
+        message.setReplyMarkup(markup);
+        executeEditedMessage(message);
+
+    }
+
+    private InlineKeyboardMarkup getInlineKeyboardMarkup() {
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> rowsInline = new ArrayList<>();
         List<InlineKeyboardButton> rowInline = new ArrayList<>();
@@ -123,9 +145,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         rowInline.add(inlineKeyboardButton);
         rowsInline.add(rowInline);
         markup.setKeyboard(rowsInline);
-        message.setReplyMarkup(markup);
-        executeMessage(message);
-
+        return markup;
     }
 
 //    private void registerUser(Message message) {
@@ -174,6 +194,13 @@ public class TelegramBot extends TelegramLongPollingBot {
 
 
     private void executeMessage(SendMessage message) {
+        try {
+            execute(message);
+        } catch (TelegramApiException e) {
+            log.error(ERROR_OCCURED + e.getMessage());
+        }
+    }
+    private void executeEditedMessage(EditMessageText message) {
         try {
             execute(message);
         } catch (TelegramApiException e) {
